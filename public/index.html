@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Arena: Duo do Milhão — Revisão em Sala</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="launcher-page">
+  <main class="launcher-shell">
+    <section class="launcher-hero" aria-labelledby="hero-title">
+      <div>
+        <span class="duo-pill duo-pill--gold">🏆 Campeonato Ao Vivo • Linux Servidores</span>
+        <h1 id="hero-title">Linux Arena: Duo do Milhão</h1>
+        <p class="launcher-subtitle">
+          A energia de campeonato do <strong>Kahoot</strong>, a emoção do <strong>Show do Milhão</strong> e o visual interativo do <strong>Duolingo</strong> para revisar toda a apostila de Servidores Linux antes da prova!
+        </p>
+      </div>
+      <div id="hero-mascot" aria-hidden="true"></div>
+    </section>
+
+    <section class="launcher-grid" aria-label="Escolha o modo de acesso">
+      <article class="duo-card mode-card">
+        <div>
+          <div class="mode-card__icon" style="background: var(--duo-gold-soft); color: #854d0e;">📺</div>
+          <h2 style="margin-block-start: 0.75rem;">Tela da TV (Professor)</h2>
+          <p style="color: var(--ink-muted); margin-block-start: 0.45rem;">
+            Projete na TV da sala! Gera o <strong>PIN + QR Code</strong>, controla as rodadas, exibe as alternativas A–E e o <strong>Ranking ao Vivo</strong>.
+          </p>
+        </div>
+        <a href="/tv.html" class="duo-btn duo-btn--gold duo-btn--lg">Abrir Tela da TV</a>
+      </article>
+
+      <article class="duo-card mode-card">
+        <div>
+          <div class="mode-card__icon" style="background: var(--duo-green-soft); color: #2b7a00;">📱</div>
+          <h2 style="margin-block-start: 0.75rem;">Tela do Celular (Aluno)</h2>
+          <p style="color: var(--ink-muted); margin-block-start: 0.45rem;">
+            Entre na partida com seu apelido, escolha seu avatar e use as ajudas <strong>Cartas, Dica do Tuxling, Pular e 2x</strong> para vencer!
+          </p>
+        </div>
+        <a href="/play.html" class="duo-btn duo-btn--green duo-btn--lg">Entrar no Campeonato</a>
+      </article>
+
+      <article class="duo-card mode-card">
+        <div>
+          <div class="mode-card__icon" style="background: var(--duo-blue-soft); color: #0369a1;">🦉</div>
+          <h2 style="margin-block-start: 0.75rem;">Treino Solo (Offline)</h2>
+          <p style="color: var(--ink-muted); margin-block-start: 0.45rem;">
+            Quer revisar sozinho no seu ritmo antes da prova? Jogue todas as 32 questões da apostila com explicações imediatas.
+          </p>
+        </div>
+        <a href="/play.html?mode=solo" class="duo-btn duo-btn--blue duo-btn--lg">Praticar Sozinho</a>
+      </article>
+    </section>
+
+    <section class="duo-card" aria-labelledby="lan-title">
+      <h2 id="lan-title" style="font-size: 1.15rem;">📡 Como conectar os celulares da turma na mesma rede</h2>
+      <p style="color: var(--ink-muted); margin-block: 0.45rem 0.85rem;">
+        Abra a <strong>Tela da TV</strong> neste computador e peça para os alunos apontarem a câmera do celular para o <strong>QR Code</strong> ou acessarem o endereço abaixo no mesmo Wi-Fi:
+      </p>
+      <div id="lan-links" style="display: flex; flex-wrap: wrap; gap: 0.65rem;">
+        <span class="duo-pill duo-pill--blue">Carregando endereços da rede...</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/mascot.js"></script>
+  <script>
+    document.getElementById('hero-mascot').innerHTML = MascotUI.renderMascot('crown', 120);
+    fetch('/api/info')
+      .then((r) => r.json())
+      .then((data) => {
+        const container = document.getElementById('lan-links');
+        if (data.mode === 'vercel') {
+          const redisPill = data.hasRedis
+            ? '<span class="duo-pill duo-pill--green">☁️ Nuvem Vercel + Redis Conectado</span>'
+            : '<span class="duo-pill duo-pill--orange">⚠️ Vercel sem Redis (Configure Upstash Redis no Marketplace)</span>';
+          container.innerHTML = `
+            <span class="duo-pill duo-pill--blue">🌐 Link Externo para Alunos: <strong>${location.origin}/play</strong></span>
+            ${redisPill}
+          `;
+          return;
+        }
+        if (!data.ips || data.ips.length === 0) {
+          container.innerHTML = `<span class="duo-pill duo-pill--orange">Acesse localmente em http://localhost:${data.port}/play</span>`;
+          return;
+        }
+        container.innerHTML = data.ips
+          .map(
+            (item) =>
+              `<span class="duo-pill duo-pill--green">📶 ${item.name}: <strong>http://${item.ip}:${data.port}/play</strong></span>`
+          )
+          .join('');
+      })
+      .catch(() => {
+        document.getElementById('lan-links').innerHTML =
+          '<span class="duo-pill duo-pill--red">Inicie o servidor com "node server.js" para habilitar o modo multiplayer na rede.</span>';
+      });
+  </script>
+</body>
+</html>

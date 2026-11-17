@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV da Sala — Linux Arena: Duo do Milhão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="tv-page">
+  <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+
+  <header class="tv-topbar">
+    <div class="tv-brand">
+      <div id="tv-brand-mascot" aria-hidden="true"></div>
+      <div>
+        <h1>Linux Arena: Duo do Milhão</h1>
+        <p style="font-size: 0.85rem; color: #94a3b8;">Revisão em Tempo Real • Arquitetura &amp; Servidores Linux</p>
+      </div>
+    </div>
+
+    <div class="tv-controls">
+      <span id="tv-top-pin" class="duo-pill duo-pill--gold" hidden>PIN: <strong id="top-pin-val">----</strong></span>
+      <span id="tv-ws-status" class="duo-pill duo-pill--blue">Conectando...</span>
+      <button type="button" id="btn-mute" class="duo-btn duo-btn--white" aria-pressed="false">🔊 Som</button>
+      <button type="button" id="btn-reset-room" class="duo-btn duo-btn--white" hidden>🔄 Nova Partida</button>
+    </div>
+  </header>
+
+  <main class="tv-main">
+    <!-- FASE 1: LOBBY -->
+    <section id="tv-lobby" class="tv-lobby-grid" aria-label="Sala de espera dos alunos">
+      <aside class="tv-join-box">
+        <div class="tv-pin-badge">
+          <span>PIN do Campeonato</span>
+          <strong id="lobby-pin">----</strong>
+        </div>
+
+        <div id="lobby-qr" class="tv-qr-wrap"></div>
+
+        <div>
+          <p id="lobby-access-label" style="font-size: 0.85rem; font-weight: 800; color: var(--ink-muted); margin-block-end: 0.35rem;">
+            Acesse pelo celular na mesma rede Wi-Fi:
+          </p>
+          <div id="lobby-url" class="tv-url-pill">Carregando...</div>
+        </div>
+
+        <div id="ip-field-wrap" class="tv-field" style="text-align: start;">
+          <label for="ip-select" style="color: var(--ink-muted);">Adaptador de Rede (IP para o QR Code)</label>
+          <select id="ip-select"></select>
+        </div>
+      </aside>
+
+      <div class="tv-lobby-right">
+        <div class="tv-config-card">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+            <h2 style="font-size: 1.4rem;">⚙️ Configurar Campeonato</h2>
+            <button type="button" id="btn-start-game" class="duo-btn duo-btn--green duo-btn--lg" disabled>
+              🚀 Iniciar Campeonato
+            </button>
+          </div>
+
+          <div class="tv-config-fields">
+            <div class="tv-field">
+              <label for="cfg-count">Nº de Perguntas</label>
+              <select id="cfg-count">
+                <option value="10">10 Perguntas (Rápido)</option>
+                <option value="16" selected>16 Perguntas (Show do Milhão)</option>
+                <option value="32">32 Perguntas (Apostila Completa)</option>
+              </select>
+            </div>
+            <div class="tv-field">
+              <label for="cfg-time">Tempo por Pergunta</label>
+              <select id="cfg-time">
+                <option value="20">20 segundos (Turbo)</option>
+                <option value="30" selected>30 segundos (Padrão)</option>
+                <option value="45">45 segundos (Reflexão)</option>
+                <option value="60">60 segundos (Debate)</option>
+              </select>
+            </div>
+            <div class="tv-field">
+              <label for="cfg-module">Módulo da Apostila</label>
+              <select id="cfg-module">
+                <option value="all" selected>Todos os 4 Módulos</option>
+                <option value="m1">Módulo 1: Boot, Kernel &amp; Processos</option>
+                <option value="m2">Módulo 2: Discos, Inodes, LVM &amp; FHS</option>
+                <option value="m3">Módulo 3: Permissões, Segurança &amp; Pacotes</option>
+                <option value="m4">Módulo 4: Rede, SSH, Firewall &amp; Load</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tv-players-panel" aria-live="polite">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+            <h2 style="font-size: 1.35rem;">👥 Alunos na Arena (<span id="lobby-player-count">0</span>)</h2>
+            <span class="duo-pill duo-pill--green">Aguardando participantes...</span>
+          </div>
+          <div id="lobby-players-grid" class="tv-players-grid">
+            <p style="color: #94a3b8; font-weight: 700;">Peça aos alunos para escanearem o QR Code ou digitarem o PIN no celular!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FASE 2: PERGUNTA AO VIVO -->
+    <section id="tv-question" hidden aria-label="Pergunta em andamento">
+      <div class="tv-question-header">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem;">
+          <span id="q-counter" class="duo-pill duo-pill--blue">Pergunta 1 / 16</span>
+          <span id="q-module" class="duo-pill duo-pill--purple">Módulo 1</span>
+          <span id="q-tier" class="duo-pill duo-pill--gold">🏆 Patamar: 1 MIL</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <span class="duo-pill duo-pill--green" aria-live="polite">
+            ✅ <strong id="q-answered-count">0</strong> / <strong id="q-total-players">0</strong> responderam
+          </span>
+          <div id="tv-timer" class="tv-timer-circle" aria-live="off">30</div>
+        </div>
+      </div>
+
+      <div class="duo-progress-track" style="margin-block: 1rem;" aria-hidden="true">
+        <div id="tv-progress-fill" class="duo-progress-fill"></div>
+      </div>
+
+      <article class="tv-question-card">
+        <h2 id="tv-question-text" class="tv-question-text">Carregando pergunta...</h2>
+      </article>
+
+      <div id="tv-options-grid" class="tv-options-grid" style="margin-block-start: 1.25rem;"></div>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.85rem; margin-block-start: 1.25rem;">
+        <button type="button" id="btn-pause" class="duo-btn duo-btn--white">⏸️ Pausar Tempo</button>
+        <button type="button" id="btn-reveal-now" class="duo-btn duo-btn--gold">⚡ Revelar Resposta Agora</button>
+      </div>
+    </section>
+
+    <!-- FASE 3: REVELAÇÃO + RANKING AO VIVO -->
+    <section id="tv-reveal" hidden aria-label="Resultado da pergunta e ranking ao vivo">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+        <h2 style="font-size: clamp(1.3rem, 2.5vw, 1.9rem);">📊 Gabarito &amp; Ranking ao Vivo</h2>
+        <button type="button" id="btn-next-question" class="duo-btn duo-btn--green duo-btn--lg">
+          ➡️ Próxima Pergunta
+        </button>
+      </div>
+
+      <div id="tv-reveal-options" class="tv-options-grid" style="margin-block: 1rem 1.25rem;"></div>
+
+      <div class="tv-reveal-grid">
+        <div style="display: grid; gap: 1rem;">
+          <article class="tv-explain-card">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div id="reveal-mascot" aria-hidden="true"></div>
+              <div>
+                <span class="duo-pill duo-pill--green">💡 Revisão da Apostila</span>
+                <h3 style="margin-block-start: 0.35rem;">Por que essa é a certa?</h3>
+              </div>
+            </div>
+            <p id="tv-explanation-text" style="font-size: 1.08rem; font-weight: 700;"></p>
+            <p id="tv-hint-text" style="font-size: 0.95rem; color: #047857; font-weight: 700;"></p>
+          </article>
+        </div>
+
+        <aside class="tv-leaderboard" aria-label="Placar dos melhores colocados">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="font-size: 1.25rem;">🏆 Placar do Campeonato</h3>
+            <span id="reveal-stats-pill" class="duo-pill duo-pill--blue">Top 10</span>
+          </div>
+          <div id="tv-ranking-list" style="display: grid; gap: 0.55rem;"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- FASE 4: PÓDIO FINAL -->
+    <section id="tv-podium" hidden aria-label="Pódio final do campeonato">
+      <div style="text-align: center; display: grid; gap: 0.65rem; justify-items: center;">
+        <div id="podium-mascot" aria-hidden="true"></div>
+        <span class="duo-pill duo-pill--gold">🎉 FIM DO CAMPEONATO SHOW DO MILHÃO!</span>
+        <h2 style="font-size: clamp(1.8rem, 4vw, 2.8rem);">Campeões da Turma</h2>
+      </div>
+
+      <div id="podium-stage" class="podium-stage"></div>
+
+      <div class="tv-leaderboard" style="inline-size: min(100%, 820px); margin-inline: auto;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
+          <h3>📋 Classificação Geral</h3>
+          <button type="button" id="btn-play-again" class="duo-btn duo-btn--green">🔄 Jogar Novamente</button>
+        </div>
+        <div id="final-ranking-list" style="display: grid; gap: 0.5rem;"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/mascot.js"></script>
+  <script src="/js/sound.js"></script>
+  <script src="/js/qr.js"></script>
+  <script src="/js/tv.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "linux-arena-duo-do-milhao",
+  "version": "1.0.0",
+  "description": "Jogo educativo estilo Kahoot + Show do Milhão com visual Duolingo para revisão de Servidores Linux",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

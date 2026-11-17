@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogar — Linux Arena: Duo do Milhão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="play-page">
+  <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+
+  <header class="play-header">
+    <div style="display: flex; align-items: center; gap: 0.55rem;">
+      <div id="header-avatar" aria-hidden="true"></div>
+      <div>
+        <strong id="header-player-name" style="font-family: var(--font-display); font-size: 1rem;">Linux Arena</strong>
+        <div id="header-sub" style="font-size: 0.78rem; color: var(--ink-muted); font-weight: 800;">Modo Campeonato</div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.45rem;">
+      <span id="header-streak" class="duo-pill duo-pill--orange" hidden>🔥 <span id="streak-val">0</span></span>
+      <span id="header-score" class="duo-pill duo-pill--gold" hidden>⭐ <span id="score-val">0</span></span>
+      <button type="button" id="btn-mute" class="duo-btn duo-btn--white" style="padding: 0.45rem 0.7rem; font-size: 0.9rem;" aria-pressed="false">🔊</button>
+    </div>
+  </header>
+
+  <main class="play-main">
+    <!-- TELA 1: ENTRAR NA SALA -->
+    <section id="screen-join" class="duo-card" aria-labelledby="join-title">
+      <div style="display: flex; align-items: center; gap: 0.85rem; margin-block-end: 1rem;">
+        <div id="join-mascot" aria-hidden="true"></div>
+        <div>
+          <span class="duo-pill duo-pill--green">🐧 Revisão para a Prova</span>
+          <h1 id="join-title" style="font-size: 1.45rem; margin-block-start: 0.35rem;">Entrar na Arena</h1>
+        </div>
+      </div>
+
+      <form id="join-form" style="display: grid; gap: 0.9rem;">
+        <div style="display: grid; gap: 0.35rem;">
+          <label for="input-pin" style="font-weight: 800; font-size: 0.9rem;">PIN da Sala (na TV)</label>
+          <input id="input-pin" class="duo-input" type="text" inputmode="numeric" maxlength="6" placeholder="Ex: 4821" required autocomplete="off">
+        </div>
+
+        <div style="display: grid; gap: 0.35rem;">
+          <label for="input-name" style="font-weight: 800; font-size: 0.9rem;">Seu Nome ou Apelido</label>
+          <input id="input-name" class="duo-input" type="text" maxlength="20" placeholder="Ex: Ana Paula" required autocomplete="nickname">
+        </div>
+
+        <div style="display: grid; gap: 0.45rem;">
+          <span style="font-weight: 800; font-size: 0.9rem;">Escolha seu Avatar</span>
+          <div id="avatar-picker" class="avatar-grid" role="radiogroup" aria-label="Avatares disponíveis"></div>
+        </div>
+
+        <p id="join-error" class="duo-pill duo-pill--red" hidden role="alert"></p>
+
+        <button type="submit" class="duo-btn duo-btn--green duo-btn--lg" style="inline-size: 100%;">
+          🚀 Entrar no Campeonato
+        </button>
+
+        <button type="button" id="btn-start-solo" class="duo-btn duo-btn--blue" style="inline-size: 100%;">
+          🦉 Prefiro Treinar Sozinho (Modo Solo)
+        </button>
+      </form>
+    </section>
+
+    <!-- TELA 2: LOBBY DE ESPERA -->
+    <section id="screen-lobby" class="duo-card" hidden style="text-align: center; display: grid; gap: 0.9rem; justify-items: center;">
+      <div id="lobby-mascot" aria-hidden="true"></div>
+      <span class="duo-pill duo-pill--green">✅ Você está conectado!</span>
+      <h2 style="font-size: 1.5rem;">Olhe para a TV da sala!</h2>
+      <p style="color: var(--ink-muted); font-weight: 700;">
+        O professor já vai iniciar o campeonato. Prepare os dedos para responder rápido e subir no ranking!
+      </p>
+      <div class="duo-pill duo-pill--blue" aria-live="polite">
+        👥 <span id="lobby-count">1</span> participante(s) na sala
+      </div>
+    </section>
+
+    <!-- TELA 3: PERGUNTA ATIVA -->
+    <section id="screen-question" hidden style="display: grid; gap: 0.85rem;" aria-label="Pergunta atual">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+        <span id="play-q-num" class="duo-pill duo-pill--blue">1 / 16</span>
+        <span id="play-q-tier" class="duo-pill duo-pill--gold">🏆 1 MIL</span>
+        <span id="play-timer-pill" class="duo-pill duo-pill--green">⏱️ 30s</span>
+      </div>
+
+      <div class="duo-progress-track" style="block-size: 12px;" aria-hidden="true">
+        <div id="play-progress-fill" class="duo-progress-fill"></div>
+      </div>
+
+      <!-- Ajudas Show do Milhão -->
+      <div class="lifelines-bar" aria-label="Ajudas do Show do Milhão">
+        <button type="button" id="life-cards" class="lifeline-btn">
+          <span style="font-size: 1.15rem;">🃏</span>
+          <span>Cartas</span>
+        </button>
+        <button type="button" id="life-hint" class="lifeline-btn">
+          <span style="font-size: 1.15rem;">🦉</span>
+          <span>Dica</span>
+        </button>
+        <button type="button" id="life-double" class="lifeline-btn">
+          <span style="font-size: 1.15rem;">⚡</span>
+          <span>2x Pts</span>
+        </button>
+        <button type="button" id="life-skip" class="lifeline-btn">
+          <span style="font-size: 1.15rem;">⏭️</span>
+          <span>Pular</span>
+        </button>
+      </div>
+
+      <div id="play-hint-box" class="hint-bubble" hidden aria-live="polite">
+        <span style="font-size: 1.35rem;">🦉</span>
+        <span id="play-hint-text"></span>
+      </div>
+
+      <article class="duo-card" style="padding: 1rem;">
+        <span id="play-q-module" style="font-size: 0.78rem; font-weight: 800; color: var(--duo-purple); text-transform: uppercase;">Módulo 1</span>
+        <h2 id="play-q-text" style="font-size: 1.08rem; margin-block-start: 0.25rem; line-height: 1.35;"></h2>
+      </article>
+
+      <div id="play-options" class="mobile-options"></div>
+
+      <div id="play-waiting-ack" class="duo-card" hidden style="text-align: center; background: #f8fafc;">
+        <p style="font-weight: 800; color: var(--ink);">⏳ Resposta travada! Aguardando o fim da rodada na TV...</p>
+      </div>
+    </section>
+
+    <!-- TELA 4: FEEDBACK DA RODADA -->
+    <section id="screen-feedback" hidden style="display: grid; gap: 0.95rem;" aria-live="polite">
+      <div id="feedback-banner" class="duo-feedback-banner">
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+          <div id="feedback-mascot" aria-hidden="true"></div>
+          <div>
+            <h2 id="feedback-title" style="font-size: 1.4rem;"></h2>
+            <p id="feedback-points" style="font-weight: 800; font-size: 1.05rem;"></p>
+          </div>
+        </div>
+        <p id="feedback-correct-answer" style="font-weight: 800;"></p>
+      </div>
+
+      <article class="duo-card">
+        <span class="duo-pill duo-pill--blue">💡 Resumo da Apostila</span>
+        <p id="feedback-explanation" style="margin-block-start: 0.55rem; font-weight: 700;"></p>
+      </article>
+
+      <div id="feedback-rank-card" class="duo-card" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <span style="font-size: 0.82rem; font-weight: 800; color: var(--ink-muted);">SUA POSIÇÃO ATUAL</span>
+          <h3 id="feedback-rank" style="font-size: 1.4rem;">#1</h3>
+        </div>
+        <span id="feedback-total-score" class="duo-pill duo-pill--gold" style="font-size: 1rem;">0 pts</span>
+      </div>
+
+      <button type="button" id="btn-solo-next" class="duo-btn duo-btn--green duo-btn--lg" hidden>
+        ➡️ Próxima Pergunta
+      </button>
+    </section>
+
+    <!-- TELA 5: RESULTADO FINAL -->
+    <section id="screen-finished" class="duo-card" hidden style="text-align: center; display: grid; gap: 0.9rem; justify-items: center;">
+      <div id="finish-mascot" aria-hidden="true"></div>
+      <span class="duo-pill duo-pill--gold">🏆 Fim de Jogo!</span>
+      <h2 id="finish-title" style="font-size: 1.65rem;">Parabéns!</h2>
+      <p id="finish-stats" style="font-weight: 800; color: var(--ink-muted);"></p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center;">
+        <span id="finish-score-pill" class="duo-pill duo-pill--gold" style="font-size: 1.05rem;">0 pts</span>
+        <span id="finish-streak-pill" class="duo-pill duo-pill--orange" style="font-size: 1.05rem;">🔥 Melhor combo: 0</span>
+      </div>
+      <button type="button" id="btn-finish-home" class="duo-btn duo-btn--blue" style="inline-size: 100%;" hidden>
+        🔄 Treinar Novamente
+      </button>
+    </section>
+  </main>
+
+  <script src="/js/questions.js"></script>
+  <script src="/js/mascot.js"></script>
+  <script src="/js/sound.js"></script>
+  <script src="/js/play.js"></script>
+</body>
+</html>
